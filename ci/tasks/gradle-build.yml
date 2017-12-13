@@ -1,0 +1,27 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: openjdk
+    tag: 8
+
+params:
+  LCD_ARTIFACTORY_USER: 'ciuser'
+  LCD_ARTIFACTORY_PASS_KEY: ''
+  LCD_SONARQUBE_KEY: ''
+  OWASP_DATA_DIR: ''
+
+inputs:
+  - name: cf-task-flyway-migration
+
+outputs:
+  - name: build-output
+
+caches:
+  - path: gradle-cache
+
+run:
+  path: /bin/bash
+  args:
+    - cf-task-flyway-migration/ci/tasks/gradle-build.sh

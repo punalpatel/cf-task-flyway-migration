@@ -1,0 +1,22 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: openjdk
+    tag: "8"
+
+params:
+  OWASP_DATA_DIR: 'owasp-cache'
+  LCD_SONARQUBE_KEY: ((lcd-sonarqube-key))
+
+inputs:
+- name: cf-task-flyway-migration
+- name: owasp-cache
+
+caches:
+- path: gradle-cache
+
+run:
+  path: cf-task-flyway-migration/ci/tasks/static-analysis.sh

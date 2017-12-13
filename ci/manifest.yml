@@ -1,0 +1,10 @@
+buildpack: java_buildpack_offline
+
+instances: 1
+memory: 1G
+applications:
+- name: cf-task-flyway-migration
+  no-route: true
+  health-check-type: none
+  services:
+  - mysql-server

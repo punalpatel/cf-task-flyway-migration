@@ -1,0 +1,80 @@
+---
+resource_types:
+- name: artifactory
+  type: docker-image
+  source:
+    repository: emeraldsquad/artifactory-resource
+
+- name: owasp-cache
+  type: docker-image
+  source:
+    repository: docker.artifacts.cfzcea.dev.desjardins.com/owasp-cache
+    insecure_registries:
+    - docker.artifacts.cfzcea.dev.desjardins.com
+    tag: 1.0.0
+
+resources:
+- name: cf-task-flyway-migration
+  type: git
+  source:
+    uri: 'ssh://git@git.cfzcea.dev.desjardins.com:7999/libre-service/cf-task-flyway-migration.git'
+    branch: 'master'
+    private_key: ((git-key))
+
+- name: artifactory-local
+  type: artifactory
+  source:
+    host: 'https://artifacts.cfzcea.dev.desjardins.com/artifactory'
+    api_key: ((lcd-artifactory-api-key))
+    repository_id: release-candidates-local
+    group_id: com.desjardins.libreservice
+    artifact_id: cf-task-flyway-migration
+
+- name: artifactory-release
+  type: artifactory
+  source:
+    host: 'https://artifacts.cfzcea.dev.desjardins.com/artifactory'
+    api_key: ((lcd-artifactory-api-key))
+    repository_id: release-local
+    group_id: com.desjardins.libreservice
+    artifact_id: cf-task-flyway-migration
+
+- name: owasp-cache
+  type: owasp-cache
+  source:
+    uri: 'https://artifacts.cfzcea.dev.desjardins.com/artifactory'
+    path: data-local/owasp/owasp.tgz
+
+jobs:
+- name: gradle-build
+  serial: true
+  public: false
+  plan:
+    - aggregate:
+      - get: cf-task-flyway-migration
+        trigger: true
+    - task: gradle-build
+      file: cf-task-flyway-migration/ci/tasks/gradle-build.yml
+    - put: artifactory-local
+      params:
+        path: build-output
+
+- name: static-analysis
+  plan:
+  - get: cf-task-flyway-migration
+    passed: [gradle-build]
+  - get: artifactory-local
+    trigger: true
+    passed: [gradle-build]
+  - get: owasp-cache
+  - task: static-analysis
+    file: cf-task-flyway-migration/ci/tasks/static-analysis.yml
+
+- name: release
+  plan:
+  - get: artifactory-local
+    trigger: true
+    passed: [static-analysis]
+  - put: artifactory-release
+    params:
+      path: artifactory-local

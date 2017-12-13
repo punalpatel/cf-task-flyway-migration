@@ -1,0 +1,7 @@
+
+instances: 1
+memory: 1G
+applications:
+- name: cf-task-flyway-migration
+  services:
+  - mysql

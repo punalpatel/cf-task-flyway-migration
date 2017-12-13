@@ -1,0 +1,107 @@
+buildscript {
+	ext {
+		artifactoryRepoUrl = "${artifactoryUrl}/${artifactoryRepoVirtual}"
+		mavenLocalRepo = System.env.MAVEN_REPO ?: "${System.properties["user.home"]}/.m2/repository"
+		springBootVersion = '1.5.8.RELEASE'
+	}
+	repositories {
+		maven {
+			url = artifactoryRepoUrl
+		}
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath("org.jfrog.buildinfo:build-info-extractor-gradle:4.4.18")
+		classpath("org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5")
+		classpath("org.owasp:dependency-check-gradle:3.0.2")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: "maven"
+apply plugin: "maven-publish"
+apply plugin: 'org.springframework.boot'
+apply plugin: "org.owasp.dependencycheck"
+apply plugin: "com.jfrog.artifactory"
+apply plugin: "org.sonarqube"
+apply plugin: "jacoco"
+
+group = 'com.desjardins.libreservice'
+description = "cf-task-flyway-migration"
+sourceCompatibility = 1.8
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+		}
+	}
+}
+
+artifactoryPublish {
+	publications('mavenJava')
+}
+
+repositories {
+	maven {
+		url = mavenLocalRepo
+	}
+	maven {
+		url = artifactoryRepoUrl
+	}
+	maven { url "https://repo.spring.io/libs-release" }
+}
+
+dependencies {
+	compile('org.springframework.boot:spring-boot-starter-actuator')
+	compile('org.springframework.boot:spring-boot-starter')
+	compile('org.springframework.boot:spring-boot-starter-data-jpa')
+	compile('org.flywaydb:flyway-core')
+	runtime('com.h2database:h2')
+	compile('org.springframework.cloud:spring-cloud-spring-service-connector:2.0.1.RELEASE')
+	compile('org.springframework.cloud:spring-cloud-cloudfoundry-connector:2.0.1.RELEASE')
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+dependencyCheck {
+	format='XML'
+	cve {
+		url12Modified="$owaspNistMirror/nvdcve-Modified.xml.gz"
+		url20Modified="$owaspNistMirror/nvdcve-2.0-Modified.xml.gz"
+		url12Base="$owaspNistMirror/nvdcve-%d.xml"
+		url20Base="$owaspNistMirror/nvdcve-2.0-%d.xml"
+	}
+	if  (System.env.OWASP_DATA_DIR) {
+		data {
+			directory="$System.env.OWASP_DATA_DIR"
+		}
+	}
+	suppressionFiles= [
+			'https://git.cfzcea.dev.desjardins.com/projects/OUTILS/repos/excludes-cve/raw/suppression.xml?raw',
+			'https://git.cfzcea.dev.desjardins.com/projects/OUTILS/repos/excludes-cve/raw/suppression-spring-1.5.8.xml?raw'
+	]
+}
+
+artifactory {
+	contextUrl = artifactoryUrl
+	publish {
+		repository {
+			repoKey = artifactoryRepoCand
+			username = artifactoryUser
+			password = "$System.env.LCD_ARTIFACTORY_PASS_KEY"
+		}
+	}
+	resolve {
+		repoKey = artifactoryRepoVirtual
+	}
+}
+
+sonarqube {
+	properties {
+		property "sonar.login", "$System.env.LCD_SONARQUBE_KEY"
+	}
+}
+
+bootRun {
+	systemProperties System.properties
+}

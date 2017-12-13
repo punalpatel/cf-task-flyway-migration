@@ -1,0 +1,7 @@
+2017-12-12T11:42:34.015-05:00 [APP/TASK/2277dc20-0ac3-4e97-bebf-82e2e13ba446 -|- 759341fd-bce9-4441-be5c-31a7e807ef2f/0] [OUT] Creating container
+2017-12-12T11:42:36.034-05:00 [APP/TASK/2277dc20-0ac3-4e97-bebf-82e2e13ba446 -|- 759341fd-bce9-4441-be5c-31a7e807ef2f/0] [OUT] Successfully created container
+2017-12-12T11:42:40.552-05:00 [APP/TASK/2277dc20-0ac3-4e97-bebf-82e2e13ba446 -|- 759341fd-bce9-4441-be5c-31a7e807ef2f/0] [ERR] /tmp/lifecycle/launcher: line 5: .profile.d/*: No such file or directory
+2017-12-12T11:42:43.231-05:00 [APP/TASK/2277dc20-0ac3-4e97-bebf-82e2e13ba446 -|- 759341fd-bce9-4441-be5c-31a7e807ef2f/0] [OUT] Exit status 137 (out of memory)
+2017-12-12T11:42:43.241-05:00 [APP/TASK/2277dc20-0ac3-4e97-bebf-82e2e13ba446 -|- 759341fd-bce9-4441-be5c-31a7e807ef2f/0] [OUT] Stopping instance ce8e5306-a536-4088-ad80-73e41ac86536
+2017-12-12T11:42:43.241-05:00 [APP/TASK/2277dc20-0ac3-4e97-bebf-82e2e13ba446 -|- 759341fd-bce9-4441-be5c-31a7e807ef2f/0] [OUT] Destroying container
+2017-12-12T11:42:44.858-05:00 [APP/TASK/2277dc20-0ac3-4e97-bebf-82e2e13ba446 -|- 759341fd-bce9-4441-be5c-31a7e807ef2f/0] [OUT] Successfully destroyed container
